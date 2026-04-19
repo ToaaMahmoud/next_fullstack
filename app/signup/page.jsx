@@ -1,0 +1,123 @@
+"use client";
+
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
+import Input from "../components/input";
+
+export default function RegisterPage() {
+    const router = useRouter();
+
+    const {
+        register,
+        handleSubmit,
+        setValue,
+        watch,
+        formState: { errors },
+    } = useForm({
+        defaultValues: {
+            fullName: "",
+            email: "",
+            password: "",
+            role: "customer",
+        },
+    });
+
+    // Watch the role , help styling the buttons corectly
+    const selectedRole = watch("role");
+
+    const onSubmit = (data) => {
+        console.log("Form Data:", data);
+
+        // const destination = data.role === "seller" ? "/seller" : "/account";
+        // router.push(destination);
+    };
+
+    return (
+
+        <div className="mx-auto w-full max-w-screen-sm lg:max-w-2xl px-0 sm:px-6 py-10 md:py-20">
+
+            <div className="bg-paper border-thicker border-ink p-8 shadow-block">
+                <div className="inline-block bg-pop-pink border-thick px-3 py-1 font-mono-tag shadow-block-sm">
+                    New here
+                </div>
+
+                <h1 className="mt-4 font-display text-5xl uppercase tracking-tighter">
+                    Create account
+                </h1>
+
+                <form className="mt-8 space-y-4" onSubmit={handleSubmit(onSubmit)}>
+                    <Input
+                        label="Full name"
+                        {...register("fullName", { required: "Name is required" })}
+                    />
+                    {errors.fullName && <p className="text-pop-pink text-xs">{errors.fullName.message}</p>}
+
+                    <Input
+                        label="Email"
+                        type="email"
+                        {...register("email", { required: "Email is required" })}
+                    />
+                    {errors.email && <p className="text-pop-pink text-xs">{errors.email.message}</p>}
+
+
+                    <Input
+                        label="Password"
+                        type="password"
+                        {...register("password", { minLength: { value: 6, message: "Too short!" } })}
+                    />
+                    {errors.password && <p className="text-pop-pink text-xs">{errors.password.message}</p>}
+
+
+                    <div>
+                        <span className="font-mono-tag block mb-2">I want to join as</span>
+                        <div className="grid grid-cols-2 gap-2">
+                            {["customer", "seller"].map((r) => (
+                                <button
+                                    type="button"
+                                    key={r}
+
+                                    onClick={() => setValue("role", r)}
+                                    className={`border-thick py-2 font-mono-tag shadow-block-sm hover-pop transition-all ${selectedRole === r
+                                        ? "bg-ink text-paper"
+                                        : r === "seller"
+                                            ? "bg-pop-blue text-paper"
+                                            : "bg-pop-yellow"
+                                        }`}
+                                >
+                                    {r.charAt(0).toUpperCase() + r.slice(1)}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    <button
+                        type="submit"
+                        className="w-full bg-ink text-paper border-thick py-3 font-display text-lg uppercase tracking-wider shadow-block hover-press active:translate-y-1 transition-all"
+                    >
+                        Create account →
+                    </button>
+                </form>
+
+                <div className="mt-6 text-sm">
+                    Have an account?{" "}
+                    <Link href="/signin" className="underline font-bold">
+                        Sign in
+                    </Link>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+// function Input({ label, ...props }) {
+//     return (
+//         <label className="block">
+//             <span className="font-mono-tag block mb-1">{label}</span>
+//             <input
+//                 {...props}
+//                 className="w-full border-thick bg-background px-3 py-2 outline-none focus:bg-white transition-colors"
+//             />
+//         </label>
+//     );
+// }
