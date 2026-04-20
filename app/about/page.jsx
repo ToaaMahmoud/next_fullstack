@@ -22,7 +22,7 @@ function page() {
                 <div className="bg-pop-blue text-paper border-thicker border-ink p-8 shadow-block-sm -rotate-1">
                     <p className="text-lg leading-relaxed">
                         Every product passes through our hands before it leaves the studio.
-                        What you receive is what we'd keep for ourselves. Nothing more,
+                        What you receive is what we&apos;d keep for ourselves. Nothing more,
                         nothing less.
                     </p>
                 </div>

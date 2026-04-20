@@ -1,13 +1,16 @@
 "use client"
 import Link from 'next/link';
-import { useState } from 'react';
+import { getCartCount, useCartStore } from '../../lib/stores/cart-store';
+import { useUserStore } from '../../lib/stores/user-store';
 
 function Navbar() {
+    const count = useCartStore((state) => getCartCount(state.items));
+    const user = useUserStore((state) => state.user);
+    const logout = useUserStore((state) => state.logout);
 
-    const [count, setCount] = useState(0);
-    const [user, setUser] = useState();
-
-    const handleLogout = () => { };
+    const handleLogout = () => {
+        logout();
+    };
 
 
     return (
@@ -47,6 +50,10 @@ function Navbar() {
                             Admin
                         </Link>
                     )}
+
+                    <Link href="/checkout" className="font-mono-tag px-3 py-2 border-thick border-transparent hover:border-ink hover:bg-pop-yellow">
+                        Checkout
+                    </Link>
                 </nav>
 
                 <div className="flex items-center gap-2">

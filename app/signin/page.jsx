@@ -4,9 +4,11 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import Input from "../components/input";
+import { useUserStore } from "../../lib/stores/user-store";
 
 export default function LoginPage() {
     const router = useRouter();
+    const login = useUserStore((state) => state.login);
 
     const {
         register,
@@ -16,15 +18,18 @@ export default function LoginPage() {
         formState: { errors },
     } = useForm({
         defaultValues: {
-            email: "",
+            emailOrPhone: "",
             password: "",
             role: "customer",
         },
     });
     const selectedRole = watch("role");
 
-    const onSubmit = (data) => {
-        console.log("Logging in with:", data);
+    const onSubmit = async (data) => {
+        const user = await login(data);
+        const destination =
+            user.role === "admin" ? "/admin" : user.role === "seller" ? "/seller" : "/account";
+        router.push(destination);
     };
 
     return (
@@ -38,11 +43,11 @@ export default function LoginPage() {
 
                 <form className="mt-8 space-y-4" onSubmit={handleSubmit(onSubmit)}>
                     <Input
-                        label="Email"
-                        type="email"
-                        {...register("email", { required: "Email is required" })}
+                        label="Email or phone"
+                        type="text"
+                        {...register("emailOrPhone", { required: "Email or phone is required" })}
                     />
-                    {errors.email && <p className="text-pop-pink text-xs mt-1">{errors.email.message}</p>}
+                    {errors.emailOrPhone && <p className="text-pop-pink text-xs mt-1">{errors.emailOrPhone.message}</p>}
 
                     <Input
                         label="Password"
@@ -83,6 +88,10 @@ export default function LoginPage() {
                     </button>
                 </form>
 
+                <p className="mt-4 text-sm opacity-70">
+                    Mock login accepts either seeded email or phone for the selected role.
+                </p>
+
                 <div className="my-6 flex items-center gap-3 font-mono-tag text-xs">
                     <span className="flex-1 border-t-thick" />
                     OR
@@ -105,4 +114,3 @@ export default function LoginPage() {
         </div>
     );
 }
-

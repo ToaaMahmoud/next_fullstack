@@ -1,27 +1,26 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
-import { useState } from "react";
-
-const formatPrice = (price) => `$${price.toFixed(2)}`;
+import { useCartStore } from "../../lib/stores/cart-store";
+import { useUserStore } from "../../lib/stores/user-store";
+import { formatPrice } from "../../lib/format";
 
 const tagColors = ["bg-pop-yellow", "bg-pop-red text-paper", "bg-pop-blue text-paper", "bg-paper"];
 const rotations = ["rotate-1", "-rotate-1", "rotate-0", "-rotate-2"];
 
 export default function ProductCard({ product, index = 0 }) {
-    // Mocking cart/wishlist state until connecting to actual store
-    const [isWished, setIsWished] = useState(false);
-
     const tagColor = tagColors[index % tagColors.length];
     const rot = rotations[index % rotations.length];
+    const addItem = useCartStore((state) => state.addItem);
+    const toggleFavorite = useUserStore((state) => state.toggleFavorite);
+    const isWished = useUserStore((state) => state.hasFavorite(product.id));
 
     const handleAdd = () => {
-        console.log("Added to cart:", product.id);
+        addItem(product, 1);
     };
 
     const handleToggleWish = () => {
-        setIsWished(!isWished);
+        toggleFavorite(product.id);
     };
 
     return (
@@ -53,15 +52,22 @@ export default function ProductCard({ product, index = 0 }) {
                         {product.name}
                     </h3>
                 </Link>
+                <p className="mt-2 text-sm opacity-80">{product.description}</p>
+                <div className="mt-3 flex items-center justify-between font-mono-tag text-[11px]">
+                    <span>{product.stock > 0 ? `${product.stock} in stock` : "Sold out"}</span>
+                    <span>{product.rating} / 5</span>
+                </div>
 
                 <div className="mt-3 flex items-center gap-2">
                     <button
+                        type="button"
                         onClick={handleAdd}
                         className="flex-1 bg-ink text-paper px-3 py-2 font-mono-tag hover:bg-pop-red transition-colors"
                     >
                         Add +
                     </button>
                     <button
+                        type="button"
                         aria-label="Wishlist"
                         onClick={handleToggleWish}
                         className="border-thick px-3 py-2 hover:bg-ink hover:text-paper transition-all"

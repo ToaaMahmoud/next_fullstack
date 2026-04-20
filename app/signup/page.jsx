@@ -4,9 +4,11 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import Input from "../components/input";
+import { useUserStore } from "../../lib/stores/user-store";
 
 export default function RegisterPage() {
     const router = useRouter();
+    const registerUser = useUserStore((state) => state.register);
 
     const {
         register,
@@ -18,7 +20,10 @@ export default function RegisterPage() {
         defaultValues: {
             fullName: "",
             email: "",
+            phone: "",
             password: "",
+            address: "",
+            storeName: "",
             role: "customer",
         },
     });
@@ -26,11 +31,9 @@ export default function RegisterPage() {
     // Watch the role , help styling the buttons corectly
     const selectedRole = watch("role");
 
-    const onSubmit = (data) => {
-        console.log("Form Data:", data);
-
-        // const destination = data.role === "seller" ? "/seller" : "/account";
-        // router.push(destination);
+    const onSubmit = async (data) => {
+        const user = await registerUser(data);
+        router.push(user.role === "seller" ? "/seller" : "/account");
     };
 
     return (
@@ -60,6 +63,12 @@ export default function RegisterPage() {
                     />
                     {errors.email && <p className="text-pop-pink text-xs">{errors.email.message}</p>}
 
+                    <Input
+                        label="Phone"
+                        type="text"
+                        {...register("phone", { required: "Phone is required" })}
+                    />
+                    {errors.phone && <p className="text-pop-pink text-xs">{errors.phone.message}</p>}
 
                     <Input
                         label="Password"
@@ -67,6 +76,19 @@ export default function RegisterPage() {
                         {...register("password", { minLength: { value: 6, message: "Too short!" } })}
                     />
                     {errors.password && <p className="text-pop-pink text-xs">{errors.password.message}</p>}
+
+                    <Input
+                        label="Address"
+                        {...register("address")}
+                    />
+
+                    {selectedRole === "seller" && (
+                        <Input
+                            label="Store name"
+                            {...register("storeName", { required: "Store name is required for sellers" })}
+                        />
+                    )}
+                    {errors.storeName && <p className="text-pop-pink text-xs">{errors.storeName.message}</p>}
 
 
                     <div>
@@ -105,6 +127,10 @@ export default function RegisterPage() {
                         Sign in
                     </Link>
                 </div>
+
+                <p className="mt-4 text-sm opacity-70">
+                    Registration stays mocked for now and shows email confirmation as a pending UI state.
+                </p>
             </div>
         </div>
     );

@@ -1,89 +1,15 @@
 import Link from "next/link";
 import ProductCard from "./components/ProductCard";
+import { products, categories } from "../lib/mockdata";
+
 
 const catColors = ["bg-pop-red text-paper", "bg-pop-yellow", "bg-pop-blue text-paper", "bg-paper"];
-
+const featured = [...products]
 export default function Home() {
-
-  const featured = [
-  {
-    id: "p1",
-    name: "Heavyweight Cotton Tee",
-    price: 48,
-    category: "apparel",
-    description: "320gsm tubular cotton, garment-dyed in Portugal.",
-    image: "https://xcdn.next.co.uk/common/items/default/default/itemimages/3_4Ratio/product/lge/T26252s.jpg",
-    stock: 12,
-    rating: 4.8,
-    reviews: 124,
-  },
-  {
-    id: "p2",
-    name: "Wool Field Jacket",
-    price: 320,
-    category: "apparel",
-    description: "Boiled wool, horn buttons, fully lined.",
-    image: "https://thomasfarthing.co.uk/cdn/shop/files/RIVERTON_3_f47813db-f01a-48f6-bd43-938621a77df8_800x.jpg?v=1768285498a",
-    stock: 5,
-    rating: 4.9,
-    reviews: 38,
-  },
-  {
-    id: "p3",
-    name: "Selvedge Denim",
-    price: 180,
-    category: "apparel",
-    description: "14oz Japanese selvedge, straight leg.",
-    image: "https://xcdn.next.co.uk/common/items/default/default/itemimages/3_4Ratio/product/lge/AD1037s.jpg?im=Resize,width=750",
-    stock: 20,
-    rating: 4.7,
-    reviews: 211,
-  },
-  {
-    id: "p4",
-    name: "Linen Overshirt",
-    price: 145,
-    category: "apparel",
-    description: "European linen, mother-of-pearl buttons.",
-    image: "https://content.josephturner.co.uk/ExtraLarge/12cc9eca-mens-natural-linen-overshirt-mclnosnat_1.jpg",
-    stock: 9,
-    rating: 4.6,
-    reviews: 64,
-  },
-  {
-    id: "p5",
-    name: "Ceramic Vessel",
-    price: 95,
-    category: "objects",
-    description: "Hand-thrown stoneware, matte glaze.",
-    image: "https://static.zarahome.net/assets/public/26f2/35ad/e70f46e2bbf5/05140e5c4b92/46371000802-r1/46371000802-r1.jpg?ts=1744021965671",
-    stock: 7,
-    rating: 4.9,
-    reviews: 22,
-  },
-  {
-    id: "p6",
-    name: "Brass Desk Lamp",
-    price: 240,
-    category: "objects",
-    description: "Solid brass, dimmable LED.",
-    image: "https://marketbymodernnest.com/cdn/shop/products/EnglishCountry_209_1024x.jpg?v=1678316361",
-    stock: 4,
-    rating: 5.0,
-    reviews: 17,
-  }
-]
-
-const categories = [
-  { id: "apparel", name: "Apparel", count: 4 },
-  { id: "objects", name: "Objects", count: 4 },
-  { id: "books", name: "Books", count: 2 },
-  { id: "audio", name: "Audio", count: 2 },
-];
 
   return (
     <div className="px-4 md:px-8 pt-8 pb-24">
-      
+
       <section className="mx-auto max-w-[1400px] grid grid-cols-1 lg:grid-cols-12 border-thicker border-ink bg-paper shadow-block-lg overflow-hidden">
         <div className="lg:col-span-7 p-8 md:p-14 lg:border-r-thicker border-ink relative">
           <div className="inline-block bg-pop-blue text-paper px-3 py-1 font-mono-tag border-thick -rotate-2 shadow-block-sm">
@@ -112,7 +38,7 @@ const categories = [
               The studio
             </Link>
           </div>
-         
+
           <div className="absolute top-6 right-6 size-12 bg-pop-yellow border-thick rotate-12 hidden md:block" />
         </div>
 
@@ -147,7 +73,7 @@ const categories = [
         </div>
       </section>
 
-      
+
       <section className="mx-auto max-w-[1400px] mt-24">
         <div className="flex items-end justify-between mb-8">
           <div className="bg-ink text-paper px-6 py-3 -rotate-1 shadow-block-sm">
@@ -170,7 +96,7 @@ const categories = [
         </div>
       </section>
 
-     
+
       <section className="mx-auto max-w-[1400px] mt-24">
         <div className="flex items-end justify-between mb-12">
           <div className="flex items-center gap-4">
@@ -188,7 +114,7 @@ const categories = [
         </div>
       </section>
 
-      
+
       <section className="mx-auto max-w-[1400px] mt-32 border-thicker border-ink bg-pop-yellow shadow-block-lg p-10 md:p-16 grid gap-10 md:grid-cols-12">
         <div className="md:col-span-3">
           <div className="font-mono-tag">A note from the studio</div>
@@ -196,8 +122,8 @@ const categories = [
         </div>
         <div className="md:col-span-9">
           <p className="font-display text-3xl md:text-5xl leading-[1.05] uppercase tracking-tighter">
-            "We don't believe in seasons. We believe in things that earn their
-            keep — in your hand, in your home, in your life."
+            &quot;We don&apos;t believe in seasons. We believe in things that earn their
+            keep — in your hand, in your home, in your life.&quot;
           </p>
           <div className="mt-8 font-mono-tag">— The editors</div>
         </div>
