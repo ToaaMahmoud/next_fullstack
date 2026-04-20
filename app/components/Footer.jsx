@@ -18,8 +18,10 @@ function Footer() {
                     <div className="font-mono-tag text-pop-lime mb-4">Shop</div>
                     <ul className="space-y-2">
                         <li><Link className='cursor-pointer hover:font-bold transition-all select-none' href="/shop">All goods</Link></li>
-                        <li><Link className='cursor-pointer hover:font-bold transition-all select-none' href="/shop">Apparel</Link></li>
-                        <li><Link className='cursor-pointer hover:font-bold transition-all select-none' href="/shop">Objects</Link></li>
+                        <li><Link className='cursor-pointer hover:font-bold transition-all select-none' href="/shop?category=apparel">Apparel</Link></li>
+                        <li><Link className='cursor-pointer hover:font-bold transition-all select-none' href="/shop?category=objects">Objects</Link></li>
+                        <li><Link className='cursor-pointer hover:font-bold transition-all select-none' href="/shop?category=books">Books</Link></li>
+                        <li><Link className='cursor-pointer hover:font-bold transition-all select-none' href="/shop?category=audio">Audio</Link></li>
                     </ul>
                 </div>
                 <div>
