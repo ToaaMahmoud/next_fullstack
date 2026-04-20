@@ -1,26 +1,199 @@
 @import "tailwindcss";
+@import "tw-animate-css";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+
+/* @custom-variant dark (&:is(.dark *)); */
 
 @theme inline {
+  --radius-sm: 0;
+  --radius-md: 0;
+  --radius-lg: 0;
+  --radius-xl: 0;
+  --radius-2xl: 0;
+  --radius-3xl: 0;
+  --radius-4xl: 0;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-ring-offset-background: var(--background);
+
+  /* Neo-brutalism palette — electric, modern, no gradients */
+  --color-paper: var(--paper);
+  --color-ink: var(--ink);
+  --color-pop-red: var(--pop-red);
+  --color-pop-blue: var(--pop-blue);
+  --color-pop-yellow: var(--pop-yellow);
+  --color-pop-beige: var(--pop-beige);
+  --color-pop-lime: var(--pop-lime);
+  --color-pop-pink: var(--pop-pink);
+
+  --font-display: var(--font-display);
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+:root {
+  --radius: 0;
+
+  /* Modern neo-brutalism: bright, saturated, high-contrast on near-white */
+  --paper: oklch(1 0 0);
+  /* pure white */
+  --ink: oklch(0.16 0 0);
+  /* near-black */
+  --pop-red: oklch(0.66 0.24 25);
+  /* electric red-orange */
+  --pop-blue: oklch(0.62 0.22 255);
+  /* electric cobalt */
+  --pop-yellow: oklch(0.92 0.21 105);
+  /* hi-vis yellow */
+  --pop-beige: oklch(0.97 0.02 95);
+  /* canvas */
+  --pop-lime: oklch(0.88 0.24 135);
+  /* punchy lime */
+  --pop-pink: oklch(0.78 0.19 0);
+  /* hot pink */
+
+  --background: var(--pop-beige);
+  --foreground: var(--ink);
+  --card: var(--paper);
+  --card-foreground: var(--ink);
+  --popover: var(--paper);
+  --popover-foreground: var(--ink);
+  --primary: var(--ink);
+  --primary-foreground: var(--paper);
+  --secondary: var(--paper);
+  --secondary-foreground: var(--ink);
+  --muted: var(--pop-beige);
+  --muted-foreground: oklch(0.4 0 0);
+  --accent: var(--pop-lime);
+  --accent-foreground: var(--ink);
+  --destructive: var(--pop-red);
+  --destructive-foreground: var(--paper);
+  --border: var(--ink);
+  --input: var(--ink);
+  --ring: var(--ink);
+
+  --font-display: "Archivo Black", "Space Grotesk", system-ui, sans-serif;
+  --font-sans: "Inter", "Outfit", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", "Space Mono", ui-monospace, monospace;
+}
+
+.dark {
+  --background: var(--ink);
+  --foreground: var(--paper);
+}
+
+@layer base {
+  * {
+    border-color: var(--color-ink);
+  }
+
+  html {
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    background-image:
+      linear-gradient(to right, color-mix(in oklab, var(--color-ink) 6%, transparent) 1px, transparent 1px),
+      linear-gradient(to bottom, color-mix(in oklab, var(--color-ink) 6%, transparent) 1px, transparent 1px);
+    background-size: 32px 32px;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    font-weight: 900;
+    letter-spacing: -0.04em;
+  }
+
+  .font-display {
+    font-family: var(--font-display);
+    font-weight: 900;
+  }
+
+  .font-mono-tag {
+    font-family: var(--font-mono);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.7rem;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer utilities {
+  .shadow-block {
+    box-shadow: 6px 6px 0 0 var(--color-ink);
+  }
+
+  .shadow-block-sm {
+    box-shadow: 3px 3px 0 0 var(--color-ink);
+  }
+
+  .shadow-block-lg {
+    box-shadow: 10px 10px 0 0 var(--color-ink);
+  }
+
+  .shadow-block-color {
+    box-shadow: 6px 6px 0 0 var(--color-pop-red);
+  }
+
+  .border-thick {
+    border-width: 3px;
+    border-color: var(--color-ink);
+  }
+
+  .border-thicker {
+    border-width: 4px;
+    border-color: var(--color-ink);
+  }
+
+  .hover-pop {
+    transition: transform .12s ease, box-shadow .12s ease;
+  }
+
+  .hover-pop:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 8px 8px 0 0 var(--color-ink);
+  }
+
+  .hover-press:hover {
+    transform: translate(2px, 2px);
+    box-shadow: none !important;
+  }
+}
+
+/* HomePage marquee */
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-marquee {
+  animation: marquee 30s linear infinite;
 }
