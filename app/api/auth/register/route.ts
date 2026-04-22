@@ -31,10 +31,14 @@ export async function POST(request: Request) {
     const parsed = registerSchema.safeParse(body);
 
     if (!parsed.success) {
-      return NextResponse.json({ message: "Invalid input", errors: parsed.error.flatten() }, { status: 400 });
+      return NextResponse.json(
+        { message: "Invalid input", errors: parsed.error.flatten() },
+        { status: 400 },
+      );
     }
 
-    const { fullName, email, phone, password, role, address, storeName } = parsed.data;
+    const { fullName, email, phone, password, role, address, storeName } =
+      parsed.data;
     const normalizedEmail = email.toLowerCase().trim();
     const normalizedPhone = phone.trim();
 
@@ -44,14 +48,21 @@ export async function POST(request: Request) {
     ]);
 
     if (existingEmailUser) {
-      return NextResponse.json({ message: "Email already exists" }, { status: 409 });
+      return NextResponse.json(
+        { message: "Email already exists" },
+        { status: 409 },
+      );
     }
 
     if (existingPhoneUser) {
-      return NextResponse.json({ message: "Phone already exists" }, { status: 409 });
+      return NextResponse.json(
+        { message: "Phone already exists" },
+        { status: 409 },
+      );
     }
 
     const passwordHash = await hashPassword(password);
+
     const createdUser = await User.create({
       name: fullName.trim(),
       email: normalizedEmail,
@@ -62,6 +73,7 @@ export async function POST(request: Request) {
       storeName: role === "seller" ? storeName?.trim() || "" : "",
       status: role === "seller" ? "pending" : "active",
       favorites: [],
+      emailVerified: true,
     });
 
     const user = toPublicUser(createdUser);
@@ -72,9 +84,14 @@ export async function POST(request: Request) {
     });
 
     const response = NextResponse.json(
-      { message: "Registered successfully", user, token },
-      { status: 201 }
+      {
+        message: "Registered successfully.",
+        user,
+        token,
+      },
+      { status: 201 },
     );
+
     response.cookies.set("auth_token", token, {
       httpOnly: true,
       sameSite: "lax",
@@ -86,6 +103,9 @@ export async function POST(request: Request) {
     return response;
   } catch (error) {
     console.error("Register error:", error);
-    return NextResponse.json({ message: "Failed to register" }, { status: 500 });
+    return NextResponse.json(
+      { message: "Failed to register" },
+      { status: 500 },
+    );
   }
 }

@@ -16,7 +16,10 @@ export async function POST(request: Request) {
     const parsed = loginSchema.safeParse(body);
 
     if (!parsed.success) {
-      return NextResponse.json({ message: "Invalid credentials" }, { status: 400 });
+      return NextResponse.json(
+        { message: "Invalid credentials" },
+        { status: 400 },
+      );
     }
 
     const { emailOrPhone, password } = parsed.data;
@@ -27,13 +30,26 @@ export async function POST(request: Request) {
     });
 
     if (!userDoc) {
-      return NextResponse.json({ message: "Invalid credentials" }, { status: 401 });
+      return NextResponse.json(
+        { message: "Invalid credentials" },
+        { status: 401 },
+      );
     }
 
     const validPassword = await comparePassword(password, userDoc.password);
     if (!validPassword) {
-      return NextResponse.json({ message: "Invalid credentials" }, { status: 401 });
+      return NextResponse.json(
+        { message: "Invalid credentials" },
+        { status: 401 },
+      );
     }
+
+/*     if (!userDoc.emailVerified) {
+      return NextResponse.json(
+        { message: "Please verify your email before logging in" },
+        { status: 403 },
+      );
+    } */
 
     const user = toPublicUser(userDoc);
     const token = signAuthToken({
