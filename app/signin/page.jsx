@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import Input from "../components/input";
 import { useUserStore } from "../../lib/stores/user-store";
@@ -9,27 +10,29 @@ import { useUserStore } from "../../lib/stores/user-store";
 export default function LoginPage() {
     const router = useRouter();
     const login = useUserStore((state) => state.login);
+    const [errorMessage, setErrorMessage] = useState("");
 
     const {
         register,
         handleSubmit,
-        setValue,
-        watch,
         formState: { errors },
     } = useForm({
         defaultValues: {
             emailOrPhone: "",
             password: "",
-            role: "customer",
         },
     });
-    const selectedRole = watch("role");
 
     const onSubmit = async (data) => {
-        const user = await login(data);
-        const destination =
-            user.role === "admin" ? "/admin" : user.role === "seller" ? "/seller" : "/account";
-        router.push(destination);
+        try {
+            setErrorMessage("");
+            await login(data);
+            router.replace("/");
+            router.refresh();
+            window.location.assign("/");
+        } catch (error) {
+            setErrorMessage(error.message || "Unable to sign in");
+        }
     };
 
     return (
@@ -41,7 +44,7 @@ export default function LoginPage() {
                 </div>
                 <h1 className="mt-4 font-display text-5xl uppercase tracking-tighter">Sign in</h1>
 
-                <form className="mt-8 space-y-4" onSubmit={handleSubmit(onSubmit)}>
+                <form className="mt-8 space-y-4" method="post" onSubmit={handleSubmit(onSubmit)}>
                     <Input
                         label="Email or phone"
                         type="text"
@@ -52,33 +55,10 @@ export default function LoginPage() {
                     <Input
                         label="Password"
                         type="password"
-                        {...register("password", { required: true })}
+                        {...register("password", { required: "Password is required" })}
                     />
                     {errors.password && <p className="text-pop-pink text-xs">{errors.password.message}</p>}
-
-
-                    <div>
-                        <span className="font-mono-tag block mb-2">Sign in as {selectedRole}</span>
-                        <div className="grid grid-cols-3 gap-2">
-                            {["customer", "seller", "admin"].map((r) => (
-                                <button
-                                    type="button"
-                                    key={r}
-                                    onClick={() => setValue("role", r)}
-                                    className={`border-thick py-2 font-mono-tag shadow-block-sm hover-pop transition-all ${selectedRole === r
-                                        ? "bg-ink text-paper"
-                                        : r === "admin"
-                                            ? "bg-pop-pink"
-                                            : r === "seller"
-                                                ? "bg-pop-blue text-paper"
-                                                : "bg-pop-yellow"
-                                        }`}
-                                >
-                                    {r}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
+                    {errorMessage && <p className="text-pop-pink text-xs">{errorMessage}</p>}
 
                     <button
                         type="submit"
@@ -89,7 +69,7 @@ export default function LoginPage() {
                 </form>
 
                 <p className="mt-4 text-sm opacity-70">
-                    Mock login accepts either seeded email or phone for the selected role.
+                    Use the email or phone and password you registered with.
                 </p>
 
                 <div className="my-6 flex items-center gap-3 font-mono-tag text-xs">

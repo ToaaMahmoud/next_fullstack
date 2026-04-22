@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import Input from "../components/input";
 import { useUserStore } from "../../lib/stores/user-store";
@@ -9,6 +10,7 @@ import { useUserStore } from "../../lib/stores/user-store";
 export default function RegisterPage() {
     const router = useRouter();
     const registerUser = useUserStore((state) => state.register);
+    const [errorMessage, setErrorMessage] = useState("");
 
     const {
         register,
@@ -32,8 +34,15 @@ export default function RegisterPage() {
     const selectedRole = watch("role");
 
     const onSubmit = async (data) => {
-        const user = await registerUser(data);
-        router.push(user.role === "seller" ? "/seller" : "/account");
+        try {
+            setErrorMessage("");
+            await registerUser(data);
+            router.replace("/");
+            router.refresh();
+            window.location.assign("/");
+        } catch (error) {
+            setErrorMessage(error.message || "Unable to register");
+        }
     };
 
     return (
@@ -49,7 +58,7 @@ export default function RegisterPage() {
                     Create account
                 </h1>
 
-                <form className="mt-8 space-y-4" onSubmit={handleSubmit(onSubmit)}>
+                <form className="mt-8 space-y-4" method="post" onSubmit={handleSubmit(onSubmit)}>
                     <Input
                         label="Full name"
                         {...register("fullName", { required: "Name is required" })}
@@ -73,7 +82,10 @@ export default function RegisterPage() {
                     <Input
                         label="Password"
                         type="password"
-                        {...register("password", { minLength: { value: 6, message: "Too short!" } })}
+                        {...register("password", {
+                            required: "Password is required",
+                            minLength: { value: 6, message: "Too short!" },
+                        })}
                     />
                     {errors.password && <p className="text-pop-pink text-xs">{errors.password.message}</p>}
 
@@ -89,6 +101,7 @@ export default function RegisterPage() {
                         />
                     )}
                     {errors.storeName && <p className="text-pop-pink text-xs">{errors.storeName.message}</p>}
+                    {errorMessage && <p className="text-pop-pink text-xs">{errorMessage}</p>}
 
 
                     <div>
@@ -129,7 +142,7 @@ export default function RegisterPage() {
                 </div>
 
                 <p className="mt-4 text-sm opacity-70">
-                    Registration stays mocked for now and shows email confirmation as a pending UI state.
+                    Registration now creates a real account in MongoDB Atlas.
                 </p>
             </div>
         </div>

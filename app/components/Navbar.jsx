@@ -1,16 +1,27 @@
 "use client"
 import Link from 'next/link';
+import { useEffect, useState } from 'react';
 import { getCartCount, useCartStore } from '../../lib/stores/cart-store';
 import { useUserStore } from '../../lib/stores/user-store';
 
 function Navbar() {
+    const [isHydrated, setIsHydrated] = useState(false);
     const count = useCartStore((state) => getCartCount(state.items));
     const user = useUserStore((state) => state.user);
     const logout = useUserStore((state) => state.logout);
+    const hydrateUser = useUserStore((state) => state.hydrateUser);
+
+    useEffect(() => {
+        setIsHydrated(true);
+        hydrateUser();
+    }, [hydrateUser]);
 
     const handleLogout = () => {
         logout();
     };
+
+    const canShowUser = isHydrated && Boolean(user);
+    const displayedCount = isHydrated ? count : 0;
 
 
     return (
@@ -33,19 +44,19 @@ function Navbar() {
                         About
                     </Link>
 
-                    {user && (
+                    {canShowUser && (
                         <Link href="/account" className="font-mono-tag px-3 py-2 border-thick border-transparent hover:border-ink hover:bg-pop-lime">
                             Account
                         </Link>
                     )}
 
-                    {user?.role === "seller" && (
+                    {canShowUser && user?.role === "seller" && (
                         <Link href="/seller" className="font-mono-tag px-3 py-2 border-thick border-transparent hover:border-ink hover:bg-pop-blue">
                             Seller Dashboard
                         </Link>
                     )}
 
-                    {user?.role === "admin" && (
+                    {canShowUser && user?.role === "admin" && (
                         <Link href="/admin" className="font-mono-tag px-3 py-2 border-thick border-transparent hover:border-ink hover:bg-pop-pink">
                             Admin
                         </Link>
@@ -57,7 +68,7 @@ function Navbar() {
                 </nav>
 
                 <div className="flex items-center gap-2">
-                    {user ? (
+                    {canShowUser ? (
                         <>
                             <span className=" md:inline-flex items-center gap-2 border-thick bg-pop-lime px-3 py-2 font-mono-tag shadow-block-sm">
                                 <span className="size-2 bg-ink" />
@@ -90,7 +101,7 @@ function Navbar() {
                         href="/cart"
                         className="border-thick bg-pop-yellow px-4 py-2 font-mono-tag shadow-block-sm hover-pop"
                     >
-                        Cart [{count.toString().padStart(2, "0")}]
+                        Cart [{displayedCount.toString().padStart(2, "0")}]
                     </Link>
                 </div>
             </div>
