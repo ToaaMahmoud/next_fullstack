@@ -71,7 +71,10 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ message: "Invalid action" }, { status: 400 });
     }
 
-    const user = await User.findByIdAndUpdate(userId, update, { new: true });
+    const user = await User.findByIdAndUpdate(userId, update, {
+      new: true,
+      select: "-password",
+    });
 
     if (!user) {
       return NextResponse.json({ message: "User not found" }, { status: 404 });

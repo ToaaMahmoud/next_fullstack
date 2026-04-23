@@ -2,7 +2,11 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { getOrdersByUser, getProductById } from "../../lib/mock-api";
+import {
+  normalizeOrder,
+  normalizeProduct,
+  requestJSON,
+} from "../../lib/api-client";
 import { formatPrice } from "../../lib/format";
 import { useUserStore } from "../../lib/stores/user-store";
 
@@ -12,20 +16,40 @@ export default function AccountPage() {
   const updateProfile = useUserStore((state) => state.updateProfile);
   const [orders, setOrders] = useState([]);
   const [favoriteProducts, setFavoriteProducts] = useState([]);
+  const [profileMessage, setProfileMessage] = useState("");
+  const [loadError, setLoadError] = useState("");
 
   useEffect(() => {
     async function load() {
       if (!user) return;
-      const [userOrders, favoriteItems] = await Promise.all([
-        getOrdersByUser(user.id),
-        Promise.all(favorites.map((id) => getProductById(id))),
-      ]);
-      setOrders(userOrders);
-      setFavoriteProducts(favoriteItems.filter(Boolean));
+
+      try {
+        setLoadError("");
+        const [ordersResponse, productsResponse] = await Promise.all([
+          requestJSON("/api/orders", { method: "GET" }),
+          requestJSON("/api/products?limit=1000", { method: "GET" }),
+        ]);
+
+        const catalog = (productsResponse.products || []).map(normalizeProduct);
+        setOrders((ordersResponse.orders || []).map(normalizeOrder));
+        setFavoriteProducts(catalog.filter((product) => favorites.includes(product.id)));
+      } catch (error) {
+        setLoadError(error.message || "Failed to load account data");
+      }
     }
 
     load();
   }, [favorites, user]);
+
+  async function handleProfileBlur(field, value) {
+    try {
+      setProfileMessage("");
+      await updateProfile({ [field]: value });
+      setProfileMessage("Profile saved.");
+    } catch (error) {
+      setProfileMessage(error.message || "Failed to save profile.");
+    }
+  }
 
   if (!user) {
     return (
@@ -64,7 +88,7 @@ export default function AccountPage() {
                 <span className="font-mono-tag block mb-1">Full name</span>
                 <input
                   defaultValue={user.name}
-                  onBlur={(event) => updateProfile({ name: event.target.value })}
+                  onBlur={(event) => handleProfileBlur("name", event.target.value)}
                   className="w-full border-thick bg-background px-3 py-2 outline-none"
                 />
               </label>
@@ -72,21 +96,14 @@ export default function AccountPage() {
                 <span className="font-mono-tag block mb-1">Address</span>
                 <input
                   defaultValue={user.address}
-                  onBlur={(event) => updateProfile({ address: event.target.value })}
-                  className="w-full border-thick bg-background px-3 py-2 outline-none"
-                />
-              </label>
-              <label className="block">
-                <span className="font-mono-tag block mb-1">Payment details</span>
-                <input
-                  defaultValue={user.paymentDetails?.method}
-                  onBlur={(event) =>
-                    updateProfile({ paymentDetails: { method: event.target.value } })
-                  }
+                  onBlur={(event) => handleProfileBlur("address", event.target.value)}
                   className="w-full border-thick bg-background px-3 py-2 outline-none"
                 />
               </label>
             </div>
+            {profileMessage ? (
+              <div className="mt-4 font-mono-tag text-sm">{profileMessage}</div>
+            ) : null}
           </div>
 
           <div className="border-thicker border-ink bg-pop-yellow p-6 shadow-block-sm">
@@ -102,6 +119,12 @@ export default function AccountPage() {
               </div>
             </div>
           </div>
+
+          {loadError ? (
+            <div className="border-thick bg-pop-pink p-4 font-mono-tag text-sm">
+              {loadError}
+            </div>
+          ) : null}
         </section>
 
         <section className="lg:col-span-7 space-y-6">
@@ -143,20 +166,6 @@ export default function AccountPage() {
                   <div className="mt-3 text-sm">Payment: {order.paymentMethod} · Total: {formatPrice(order.total)}</div>
                 </div>
               ))}
-            </div>
-          </div>
-
-          <div className="border-thicker border-ink bg-pop-blue text-paper p-6 shadow-block-sm">
-            <div className="font-display text-2xl uppercase">Reviews & ratings</div>
-            <div className="mt-4 grid gap-4 md:grid-cols-2">
-              <div className="border-thick border-paper p-4">
-                <div className="font-mono-tag text-pop-yellow">Average rating</div>
-                <div className="mt-2 font-display text-4xl uppercase">4.8 / 5</div>
-              </div>
-              <div className="border-thick border-paper p-4">
-                <div className="font-mono-tag text-pop-yellow">Published reviews</div>
-                <div className="mt-2 font-display text-4xl uppercase">12</div>
-              </div>
             </div>
           </div>
         </section>

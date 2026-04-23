@@ -2,7 +2,11 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
-import { getCatalog } from "../../lib/mock-api";
+import {
+    normalizeCategory,
+    normalizeProduct,
+    requestJSON,
+} from "../../lib/api-client";
 import ProductCard from "../components/ProductCard";
 
 export default function ShopPage() {
@@ -23,7 +27,22 @@ export default function ShopPage() {
 
     useEffect(() => {
         async function load() {
-            setCatalog(await getCatalog());
+            try {
+                const [productsResponse, categoriesResponse] = await Promise.all([
+                    requestJSON("/api/products?limit=1000", { method: "GET" }),
+                    requestJSON("/api/categories", { method: "GET" }),
+                ]);
+
+                const products = (productsResponse.products || []).map(normalizeProduct);
+                const categories = (categoriesResponse.categories || []).map((category) =>
+                    normalizeCategory(category, products)
+                );
+
+                setCatalog({ products, categories });
+            } catch (error) {
+                setCatalog({ products: [], categories: [] });
+                console.error(error);
+            }
         }
         load();
     }, []);

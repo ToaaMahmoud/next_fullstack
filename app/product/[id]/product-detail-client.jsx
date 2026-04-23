@@ -8,6 +8,14 @@ export default function ProductDetailClient({ product }) {
   const toggleFavorite = useUserStore((state) => state.toggleFavorite);
   const isFavorite = useUserStore((state) => state.hasFavorite(product.id));
 
+  async function handleToggleFavorite() {
+    try {
+      await toggleFavorite(product.id);
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
   return (
     <div className="border-thicker border-ink bg-pop-yellow p-6 shadow-block-sm">
       <div className="font-display text-2xl uppercase">Buy flow</div>
@@ -21,7 +29,7 @@ export default function ProductDetailClient({ product }) {
         </button>
         <button
           type="button"
-          onClick={() => toggleFavorite(product.id)}
+          onClick={handleToggleFavorite}
           className="border-thick bg-paper px-6 py-4 font-display text-lg uppercase shadow-block-sm hover-pop transition-all"
         >
           {isFavorite ? "Remove favorite" : "Save to wishlist"}

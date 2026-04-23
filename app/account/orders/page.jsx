@@ -1,18 +1,26 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getOrdersByUser } from "../../../lib/mock-api";
+import { normalizeOrder, requestJSON } from "../../../lib/api-client";
 import { formatPrice } from "../../../lib/format";
 import { useUserStore } from "../../../lib/stores/user-store";
 
 export default function OrdersPage() {
   const user = useUserStore((state) => state.user);
   const [orders, setOrders] = useState([]);
+  const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
     async function load() {
       if (!user) return;
-      setOrders(await getOrdersByUser(user.id));
+
+      try {
+        setErrorMessage("");
+        const data = await requestJSON("/api/orders", { method: "GET" });
+        setOrders((data.orders || []).map(normalizeOrder));
+      } catch (error) {
+        setErrorMessage(error.message || "Failed to load orders.");
+      }
     }
     load();
   }, [user]);
@@ -25,6 +33,11 @@ export default function OrdersPage() {
       </header>
 
       <div className="mt-8 space-y-6">
+        {errorMessage ? (
+          <div className="border-thick bg-pop-pink p-4 font-mono-tag">
+            {errorMessage}
+          </div>
+        ) : null}
         {orders.length === 0 ? (
           <div className="border-thicker border-dashed border-ink bg-paper p-10 font-mono-tag">
             No orders yet for this account.
@@ -49,21 +62,27 @@ export default function OrdersPage() {
                   <div className="font-mono-tag opacity-70">Order summary</div>
                   <div className="mt-3 space-y-2 text-sm">
                     <div>Total: {formatPrice(order.total)}</div>
-                    <div>Payment: {order.paymentMethod} ({order.paymentStatus})</div>
-                    <div>Shipping: {order.shippingMethod}</div>
-                    <div>Notifications: Email confirmation mocked for {order.customerEmail}</div>
+                    <div>Payment: {order.paymentMethod}</div>
+                    <div>Shipping address: {order.shippingAddress}</div>
+                    <div>Tracking: {order.trackingNumber || "Not assigned yet"}</div>
                   </div>
                 </div>
                 <div className="lg:col-span-7 border-thick p-4">
-                  <div className="font-mono-tag opacity-70">Status timeline</div>
+                  <div className="font-mono-tag opacity-70">Items</div>
                   <div className="mt-4 space-y-4">
-                    {order.timeline.map((step, index) => (
-                      <div key={`${order.id}-${step.label}`} className="flex gap-4">
-                        <div className={`mt-1 size-4 border-thick ${index === order.timeline.length - 1 ? "bg-pop-lime" : "bg-pop-yellow"}`} />
+                    {order.items.map((item) => (
+                      <div key={`${order.id}-${item.product?._id || item.product?.id || item.product || item.price}`} className="flex gap-4">
+                        <div className="mt-1 size-4 border-thick bg-pop-yellow" />
                         <div>
-                          <div className="font-display text-xl uppercase">{step.label}</div>
-                          <div className="font-mono-tag opacity-70">{step.date}</div>
-                          <p className="mt-1 text-sm">{step.note}</p>
+                          <div className="font-display text-xl uppercase">
+                            {item.product?.name || "Product"}
+                          </div>
+                          <div className="font-mono-tag opacity-70">
+                            Qty {item.quantity}
+                          </div>
+                          <p className="mt-1 text-sm">
+                            Line total: {formatPrice(item.price * item.quantity)}
+                          </p>
                         </div>
                       </div>
                     ))}

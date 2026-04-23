@@ -41,7 +41,8 @@ export default function RegisterPage() {
             router.refresh();
             window.location.assign("/");
         } catch (error) {
-            setErrorMessage(error.message || "Unable to register");
+            console.log(error.message);
+            setErrorMessage("Unable to register, Please try Again");
         }
     };
 
@@ -105,7 +106,7 @@ export default function RegisterPage() {
 
 
                     <div>
-                        <span className="font-mono-tag block mb-2">I want to join as</span>
+                        <span className="font-mono-tag block mb-2">I want to join as {selectedRole}</span>
                         <div className="grid grid-cols-2 gap-2">
                             {["customer", "seller"].map((r) => (
                                 <button
@@ -140,23 +141,7 @@ export default function RegisterPage() {
                         Sign in
                     </Link>
                 </div>
-
-                <p className="mt-4 text-sm opacity-70">
-                    Registration now creates a real account in MongoDB Atlas.
-                </p>
             </div>
         </div>
     );
 }
-
-// function Input({ label, ...props }) {
-//     return (
-//         <label className="block">
-//             <span className="font-mono-tag block mb-1">{label}</span>
-//             <input
-//                 {...props}
-//                 className="w-full border-thick bg-background px-3 py-2 outline-none focus:bg-white transition-colors"
-//             />
-//         </label>
-//     );
-// }

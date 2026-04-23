@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { signIn } from "next-auth/react";
 import Input from "../components/input";
@@ -11,7 +11,9 @@ import { useUserStore } from "../../lib/stores/user-store";
 export default function LoginPage() {
   const router = useRouter();
   const login = useUserStore((state) => state.login);
+  const user = useUserStore((state) => state.user)
   const [errorMessage, setErrorMessage] = useState("");
+
 
   const {
     register,
@@ -36,6 +38,12 @@ export default function LoginPage() {
     }
   };
 
+  useEffect(() => {
+    if (user) {
+      router.replace("/");
+      router.refresh();
+    }
+  }, [user, router]);
   return (
     <div className="mx-auto w-full max-w-screen-sm lg:max-w-2xl px-0 sm:px-6 py-10 md:py-20">
       <div className="bg-paper border-thicker border-ink p-8 shadow-block">

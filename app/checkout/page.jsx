@@ -1,51 +1,67 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
+import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { getPaymentMethods, placeMockOrder } from "../../lib/mock-api";
+import { requestJSON } from "../../lib/api-client";
 import { formatPrice } from "../../lib/format";
 import { getCartTotals, useCartStore } from "../../lib/stores/cart-store";
 import { useUserStore } from "../../lib/stores/user-store";
+
+const PAYMENT_METHODS = [
+  { label: "Credit card", value: "credit_card" },
+  { label: "PayPal", value: "paypal" },
+  { label: "Cash on Delivery", value: "cash_on_delivery" },
+  { label: "Wallet", value: "wallet" },
+];
 
 export default function CheckoutPage() {
   const router = useRouter();
   const items = useCartStore((state) => state.items);
   const clearCart = useCartStore((state) => state.clearCart);
   const user = useUserStore((state) => state.user);
-  const isGuestCheckout = useUserStore((state) => state.isGuestCheckout);
-  const setGuestCheckout = useUserStore((state) => state.setGuestCheckout);
   const totals = useMemo(() => getCartTotals(items), [items]);
-  const [paymentMethods, setPaymentMethods] = useState([]);
-  const [paymentMethod, setPaymentMethod] = useState("Credit card");
-  const [shippingMethod, setShippingMethod] = useState("Express");
+  const [paymentMethod, setPaymentMethod] = useState(PAYMENT_METHODS[0].value);
   const [statusMessage, setStatusMessage] = useState("");
-  const [form, setForm] = useState({
-    name: user?.name || "",
-    email: user?.email || "",
-    phone: user?.phone || "",
-    address: user?.address || "",
-  });
-
-  useEffect(() => {
-    async function load() {
-      setPaymentMethods(await getPaymentMethods());
-    }
-    load();
-  }, []);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [formOverrides, setFormOverrides] = useState({});
+  const form = {
+    name: formOverrides.name ?? user?.name ?? "",
+    email: formOverrides.email ?? user?.email ?? "",
+    phone: formOverrides.phone ?? user?.phone ?? "",
+    address: formOverrides.address ?? user?.address ?? "",
+  };
 
   async function handlePlaceOrder(event) {
     event.preventDefault();
-    const result = await placeMockOrder({
-      items,
-      paymentMethod,
-      shippingMethod,
-      guest: !user || isGuestCheckout,
-      ...form,
-    });
-    setStatusMessage(`${result.id} placed. ${result.emailNotification}`);
-    clearCart();
-    setGuestCheckout(false);
-    setTimeout(() => router.push("/account/orders"), 900);
+
+    if (!user) {
+      setErrorMessage("Please sign in to place an order.");
+      return;
+    }
+
+    try {
+      setErrorMessage("");
+      setStatusMessage("");
+
+      await requestJSON("/api/orders", {
+        method: "POST",
+        body: JSON.stringify({
+          items: items.map((item) => ({
+            product: item.product.id,
+            quantity: item.quantity,
+          })),
+          shippingAddress: form.address,
+          paymentMethod,
+        }),
+      });
+
+      setStatusMessage("Order placed successfully.");
+      clearCart();
+      setTimeout(() => router.push("/account/orders"), 900);
+    } catch (error) {
+      setErrorMessage(error.message || "Failed to place order.");
+    }
   }
 
   return (
@@ -55,14 +71,26 @@ export default function CheckoutPage() {
           <div className="font-mono-tag opacity-70">Checkout</div>
           <h1 className="mt-2 font-display text-6xl uppercase tracking-tighter">Finish the order</h1>
         </div>
-        <button
-          type="button"
-          onClick={() => setGuestCheckout(!isGuestCheckout)}
-          className={`border-thick px-4 py-2 font-mono-tag shadow-block-sm ${isGuestCheckout || !user ? "bg-pop-pink" : "bg-pop-lime"}`}
-        >
-          {isGuestCheckout || !user ? "Guest checkout" : "Signed-in checkout"}
-        </button>
+        <div className={`border-thick px-4 py-2 font-mono-tag shadow-block-sm ${user ? "bg-pop-lime" : "bg-pop-pink"}`}>
+          {user ? "Signed-in checkout" : "Sign in required"}
+        </div>
       </header>
+
+      {!user ? (
+        <div className="mt-8 border-thicker border-ink bg-paper p-8 shadow-block-sm">
+          <div className="font-display text-3xl uppercase">Sign in to continue</div>
+          <p className="mt-3 max-w-xl">
+            Order creation is connected to the real API now, and guest checkout
+            does not have a backend route yet.
+          </p>
+          <Link
+            href="/signin"
+            className="mt-6 inline-block bg-ink text-paper border-thick px-6 py-3 font-mono-tag shadow-block-sm hover-pop"
+          >
+            Sign in →
+          </Link>
+        </div>
+      ) : null}
 
       <div className="mt-8 grid gap-8 lg:grid-cols-12">
         <form onSubmit={handlePlaceOrder} className="lg:col-span-7 space-y-6">
@@ -75,7 +103,10 @@ export default function CheckoutPage() {
                   <input
                     value={form[field]}
                     onChange={(event) =>
-                      setForm((current) => ({ ...current, [field]: event.target.value }))
+                      setFormOverrides((current) => ({
+                        ...current,
+                        [field]: event.target.value,
+                      }))
                     }
                     className="w-full border-thick bg-background px-3 py-2 outline-none"
                     required
@@ -88,47 +119,33 @@ export default function CheckoutPage() {
           <div className="border-thicker border-ink bg-paper p-6 shadow-block-sm">
             <div className="font-display text-2xl uppercase">Payment method</div>
             <div className="mt-4 grid gap-3 md:grid-cols-2">
-              {paymentMethods.map((method) => (
+              {PAYMENT_METHODS.map((method) => (
                 <button
-                  key={method}
+                  key={method.value}
                   type="button"
-                  onClick={() => setPaymentMethod(method)}
-                  className={`border-thick p-4 text-left font-mono-tag shadow-block-sm ${paymentMethod === method ? "bg-ink text-paper" : "bg-pop-beige"}`}
+                  onClick={() => setPaymentMethod(method.value)}
+                  className={`border-thick p-4 text-left font-mono-tag shadow-block-sm ${paymentMethod === method.value ? "bg-ink text-paper" : "bg-pop-beige"}`}
                 >
-                  {method}
+                  {method.label}
                 </button>
               ))}
             </div>
             <p className="mt-4 text-sm opacity-70">
-              Secure gateway integration is intentionally mocked right now.
+              Payment capture is still out of scope, but order creation now uses
+              the real orders API.
             </p>
-          </div>
-
-          <div className="border-thicker border-ink bg-pop-blue text-paper p-6 shadow-block-sm">
-            <div className="font-display text-2xl uppercase">Delivery preferences</div>
-            <div className="mt-4 grid gap-3 md:grid-cols-2">
-              {["Express", "Standard"].map((method) => (
-                <button
-                  key={method}
-                  type="button"
-                  onClick={() => setShippingMethod(method)}
-                  className={`border-thick border-paper p-4 text-left font-mono-tag ${shippingMethod === method ? "bg-paper text-ink" : ""}`}
-                >
-                  {method}
-                </button>
-              ))}
-            </div>
           </div>
 
           <button
             type="submit"
-            disabled={items.length === 0}
+            disabled={items.length === 0 || !user}
             className="w-full bg-ink text-paper border-thick py-4 font-display text-xl uppercase tracking-wider shadow-block hover-press transition-all disabled:opacity-40"
           >
-            Place mock order →
+            Place order →
           </button>
 
           {statusMessage ? <div className="border-thick bg-pop-lime p-4 font-mono-tag">{statusMessage}</div> : null}
+          {errorMessage ? <div className="border-thick bg-pop-pink p-4 font-mono-tag">{errorMessage}</div> : null}
         </form>
 
         <aside className="lg:col-span-5">

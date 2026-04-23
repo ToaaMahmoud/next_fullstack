@@ -19,8 +19,12 @@ export default function ProductCard({ product, index = 0 }) {
         addItem(product, 1);
     };
 
-    const handleToggleWish = () => {
-        toggleFavorite(product.id);
+    const handleToggleWish = async () => {
+        try {
+            await toggleFavorite(product.id);
+        } catch (error) {
+            console.error(error);
+        }
     };
 
     return (

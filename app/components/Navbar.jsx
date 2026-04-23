@@ -1,18 +1,16 @@
 "use client"
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { getCartCount, useCartStore } from '../../lib/stores/cart-store';
 import { useUserStore } from '../../lib/stores/user-store';
 
 function Navbar() {
-    const [isHydrated, setIsHydrated] = useState(false);
     const count = useCartStore((state) => getCartCount(state.items));
     const user = useUserStore((state) => state.user);
     const logout = useUserStore((state) => state.logout);
     const hydrateUser = useUserStore((state) => state.hydrateUser);
 
     useEffect(() => {
-        setIsHydrated(true);
         hydrateUser();
     }, [hydrateUser]);
 
@@ -20,8 +18,8 @@ function Navbar() {
         logout();
     };
 
-    const canShowUser = isHydrated && Boolean(user);
-    const displayedCount = isHydrated ? count : 0;
+    const canShowUser = Boolean(user);
+    const displayedCount = count;
 
 
     return (
@@ -62,9 +60,11 @@ function Navbar() {
                         </Link>
                     )}
 
-                    <Link href="/checkout" className="font-mono-tag px-3 py-2 border-thick border-transparent hover:border-ink hover:bg-pop-yellow">
-                        Checkout
-                    </Link>
+                    {canShowUser && user?.role === "customer" &&
+                        <Link href="/checkout" className="font-mono-tag px-3 py-2 border-thick border-transparent hover:border-ink hover:bg-pop-yellow">
+                            Checkout
+                        </Link>
+                    }
                 </nav>
 
                 <div className="flex items-center gap-2">
@@ -97,12 +97,12 @@ function Navbar() {
                             </Link>
                         </>
                     )}
-                    <Link
+                    {canShowUser && user?.role === "customer" && <Link
                         href="/cart"
                         className="border-thick bg-pop-yellow px-4 py-2 font-mono-tag shadow-block-sm hover-pop"
                     >
                         Cart [{displayedCount.toString().padStart(2, "0")}]
-                    </Link>
+                    </Link>}
                 </div>
             </div>
         </header>

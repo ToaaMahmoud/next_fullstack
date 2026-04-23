@@ -1,11 +1,42 @@
+"use client";
+
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import ProductCard from "./components/ProductCard";
-import { products, categories } from "../lib/mockdata";
+import {
+  normalizeCategory,
+  normalizeProduct,
+  requestJSON,
+} from "../lib/api-client";
 
 
 const catColors = ["bg-pop-red text-paper", "bg-pop-yellow", "bg-pop-blue text-paper", "bg-paper"];
-const featured = [...products]
 export default function Home() {
+  const [featured, setFeatured] = useState<any[]>([]);
+  const [categories, setCategories] = useState<any[]>([]);
+
+  useEffect(() => {
+    async function load() {
+      try {
+        const [productsResponse, categoriesResponse] = await Promise.all([
+          requestJSON("/api/products?limit=1000", { method: "GET" }),
+          requestJSON("/api/categories", { method: "GET" }),
+        ]);
+
+        const products = (productsResponse.products || []).map(normalizeProduct);
+        const categoryList = (categoriesResponse.categories || []).map((category: any) =>
+          normalizeCategory(category, products)
+        );
+
+        setFeatured(products.slice(0, 6));
+        setCategories(categoryList);
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    load();
+  }, []);
 
   return (
     <div className="px-4 md:px-8 pt-8 pb-24">

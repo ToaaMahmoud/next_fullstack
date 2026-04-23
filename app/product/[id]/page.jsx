@@ -1,20 +1,70 @@
+"use client";
+
 import Link from "next/link";
-import { notFound } from "next/navigation";
-import { getCatalog, getProductById } from "../../../lib/mock-api";
+import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
 import ProductDetailClient from "./product-detail-client";
 import { formatPrice } from "../../../lib/format";
+import {
+  normalizeProduct,
+  normalizeReview,
+  requestJSON,
+} from "../../../lib/api-client";
 
-export async function generateStaticParams() {
-  const { products } = await getCatalog();
-  return products.map((product) => ({ id: product.id }));
-}
+export default function ProductPage() {
+  const params = useParams();
+  const productId = params?.id;
+  const [product, setProduct] = useState(null);
+  const [reviews, setReviews] = useState([]);
+  const [errorMessage, setErrorMessage] = useState("");
 
-export default async function ProductPage({ params }) {
-  const { id } = await params;
-  const product = await getProductById(id);
+  useEffect(() => {
+    async function load() {
+      if (!productId) return;
+
+      try {
+        setErrorMessage("");
+        const [productsResponse, reviewsResponse] = await Promise.all([
+          requestJSON("/api/products?limit=1000", { method: "GET" }),
+          requestJSON(`/api/reviews?productId=${productId}`, { method: "GET" }),
+        ]);
+
+        const foundProduct = (productsResponse.products || [])
+          .map(normalizeProduct)
+          .find((item) => item.id === productId);
+
+        if (!foundProduct) {
+          setErrorMessage("Product not found.");
+          setProduct(null);
+          return;
+        }
+
+        setProduct(foundProduct);
+        setReviews((reviewsResponse.reviews || []).map(normalizeReview));
+      } catch (error) {
+        setErrorMessage(error.message || "Failed to load product.");
+      }
+    }
+
+    load();
+  }, [productId]);
+
+  if (errorMessage) {
+    return (
+      <div className="mx-auto max-w-[1400px] px-4 md:px-8 py-10">
+        <div className="border-thick bg-pop-pink p-6 font-mono-tag">
+          {errorMessage}
+        </div>
+      </div>
+    );
+  }
 
   if (!product) {
-    notFound();
+    return (
+      <div className="mx-auto max-w-[1400px] px-4 md:px-8 py-10 font-mono-tag">
+        Loading product...
+      </div>
+    );
   }
 
   return (
@@ -39,7 +89,7 @@ export default async function ProductPage({ params }) {
               <div className="bg-pop-blue text-paper border-thick px-4 py-2 font-mono-tag">{product.rating} rating</div>
             </div>
             <div className="mt-6 text-sm">
-              Seller: <span className="font-bold">{product.seller?.storeName}</span>
+              Seller: <span className="font-bold">{product.seller?.storeName || "Unknown seller"}</span>
             </div>
           </div>
 
@@ -50,13 +100,19 @@ export default async function ProductPage({ params }) {
       <section className="mt-8 border-thicker border-ink bg-paper p-6 shadow-block-sm">
         <div className="font-display text-3xl uppercase">Reviews & ratings</div>
         <div className="mt-6 grid gap-4 md:grid-cols-3">
-          {product.reviews.map((review) => (
-            <article key={review.id} className="border-thick bg-pop-beige p-4">
-              <div className="font-display text-xl uppercase">{review.title}</div>
-              <div className="mt-2 font-mono-tag opacity-70">{review.author} · {review.rating}/5</div>
-              <p className="mt-3 text-sm">{review.body}</p>
-            </article>
-          ))}
+          {reviews.length === 0 ? (
+            <div className="border-thick bg-pop-beige p-4 text-sm">
+              No reviews yet for this product.
+            </div>
+          ) : (
+            reviews.map((review) => (
+              <article key={review.id} className="border-thick bg-pop-beige p-4">
+                <div className="font-display text-xl uppercase">{review.title}</div>
+                <div className="mt-2 font-mono-tag opacity-70">{review.author} · {review.rating}/5</div>
+                <p className="mt-3 text-sm">{review.body}</p>
+              </article>
+            ))
+          )}
         </div>
       </section>
     </div>
