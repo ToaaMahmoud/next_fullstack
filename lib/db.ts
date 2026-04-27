@@ -17,7 +17,7 @@ if (!cached) {
 
 export async function connectDB() {
     const mongodbUri = process.env.MONGODB_URI;
-    console.log("mongodbUri: ", mongodbUri);
+    // console.log("mongodbUri: ", mongodbUri);
 
 
     if (!mongodbUri) {

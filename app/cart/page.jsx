@@ -13,7 +13,7 @@ export default function CartPage() {
     const totals = useMemo(() => getCartTotals(lines), [lines]);
 
     return (
-        <div className="mx-auto max-w-[1400px] px-4 md:px-8 py-10">
+        <div className="mx-auto max-w-350 px-4 md:px-8 py-10">
             <div className="border-thicker border-ink bg-paper p-8 shadow-block-sm flex items-end justify-between flex-wrap gap-4">
                 <div>
                     <div className="font-mono-tag">Bag</div>
@@ -41,6 +41,7 @@ export default function CartPage() {
                                     src={l.product.image}
                                     alt={l.product.name}
                                     unoptimized
+                                    priority
                                     width={0}
                                     height={0}
                                     className="h-28 w-28 object-cover border-thick" />
@@ -113,7 +114,7 @@ export default function CartPage() {
                                 <span className="font-display text-2xl">{formatPrice(totals.total)}</span>
                             </div>
 
-                            <Link href="/checkout" className="mt-6 block bg-ink text-paper border-thick px-6 py-4 text-center font-display text-lg uppercase tracking-wider shadow-block-sm hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all">
+                            <Link href="/checkout" className="mt-6 block bg-ink text-paper border-thick px-6 py-4 text-center font-display text-lg uppercase tracking-wider shadow-block-sm hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none transition-all">
                                 Checkout →
                             </Link>
 

@@ -93,7 +93,7 @@ export default function ShopPage() {
     console.log("filtered products: ", filtered);
 
     return (
-        <div className="mx-auto max-w-[1400px] px-4 md:px-8 py-10 min-h-screen">
+        <div className="mx-auto max-w-350 px-4 md:px-8 py-10 min-h-screen">
 
             {/* 1. HEADER SECTION */}
             <header className="border-thicker border-ink bg-paper p-8 shadow-block-sm flex flex-wrap items-end justify-between gap-4">
@@ -196,7 +196,7 @@ export default function ShopPage() {
                 </aside>
 
                 {/* --- MAIN: PRODUCTS (order-2: Below Filters on Mobile, Right on Desktop) --- */}
-                <main className="order-2 md:col-span-9 min-h-[600px] w-full">
+                <main className="order-2 md:col-span-9 min-h-150 w-full">
                     {filtered.length === 0 ? (
                         <div className="w-full border-thicker border-dashed border-ink bg-paper p-12 md:p-20 text-center shadow-block-sm flex flex-col items-center justify-center relative overflow-hidden">
                             {/* Decorative Deco */}

@@ -52,7 +52,7 @@ export default function ProductPage() {
 
   if (errorMessage) {
     return (
-      <div className="mx-auto max-w-[1400px] px-4 md:px-8 py-10">
+      <div className="mx-auto max-w-350 px-4 md:px-8 py-10">
         <div className="border-thick bg-pop-pink p-6 font-mono-tag">
           {errorMessage}
         </div>
@@ -62,7 +62,7 @@ export default function ProductPage() {
 
   if (!product) {
     return (
-      <div className="mx-auto max-w-[1400px] px-4 md:px-8 py-10 font-mono-tag">
+      <div className="mx-auto max-w-350 px-4 md:px-8 py-10 font-mono-tag">
         Loading product...
       </div>
     );
@@ -70,7 +70,7 @@ export default function ProductPage() {
   console.log(product);
 
   return (
-    <div className="mx-auto max-w-[1400px] px-4 md:px-8 py-10">
+    <div className="mx-auto max-w-350 px-4 md:px-8 py-10">
       <div className="mb-6 font-mono-tag">
         <Link href="/shop" className="underline">Shop</Link> / {product.name}
       </div>
@@ -84,6 +84,7 @@ export default function ProductPage() {
             width={0}
             height={0}
             unoptimized
+            priority
           />
         </div>
 
