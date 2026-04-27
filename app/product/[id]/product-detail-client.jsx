@@ -35,9 +35,6 @@ export default function ProductDetailClient({ product }) {
           {isFavorite ? "Remove favorite" : "Save to wishlist"}
         </button>
       </div>
-      <div className="mt-4 text-sm">
-        Product detail UI is mocked and ready to swap over to external APIs later.
-      </div>
     </div>
   );
 }

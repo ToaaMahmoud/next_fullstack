@@ -8,7 +8,7 @@ function pathStartsWith(pathname: string, target: string): boolean {
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  const protectedRoutes = ["/account", "/seller", "/admin"];
+  const protectedRoutes = ["/account", "/seller", "/admin", "/add_product"];
   const shouldProtect = protectedRoutes.some((route) => pathStartsWith(pathname, route));
   if (!shouldProtect) {
     return NextResponse.next();
@@ -30,6 +30,10 @@ export function proxy(request: NextRequest) {
       return NextResponse.redirect(new URL("/signin", request.url));
     }
 
+    if (pathStartsWith(pathname, "/add_product") && !["seller", "admin"].includes(payload.role)) {
+      return NextResponse.redirect(new URL("/signin", request.url));
+    }
+
     if (pathStartsWith(pathname, "/account") && !["customer", "seller", "admin"].includes(payload.role)) {
       return NextResponse.redirect(new URL("/signin", request.url));
     }
@@ -41,5 +45,5 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/account/:path*", "/seller/:path*", "/admin/:path*"],
+  matcher: ["/account/:path*", "/seller/:path*", "/admin/:path*", "/add_product/:path*"],
 };

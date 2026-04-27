@@ -3,12 +3,15 @@ import Link from 'next/link';
 import { useEffect } from 'react';
 import { getCartCount, useCartStore } from '../../lib/stores/cart-store';
 import { useUserStore } from '../../lib/stores/user-store';
+import { useRouter } from 'next/navigation';
 
 function Navbar() {
     const count = useCartStore((state) => getCartCount(state.items));
     const user = useUserStore((state) => state.user);
     const logout = useUserStore((state) => state.logout);
     const hydrateUser = useUserStore((state) => state.hydrateUser);
+    const router = useRouter();
+
 
     useEffect(() => {
         hydrateUser();
@@ -16,6 +19,7 @@ function Navbar() {
 
     const handleLogout = () => {
         logout();
+        router.replace("/");
     };
 
     const canShowUser = Boolean(user);
@@ -45,6 +49,12 @@ function Navbar() {
                     {canShowUser && (
                         <Link href="/account" className="font-mono-tag px-3 py-2 border-thick border-transparent hover:border-ink hover:bg-pop-lime">
                             Account
+                        </Link>
+                    )}
+
+                    {canShowUser && ["seller", "admin"].includes(user?.role) && (
+                        <Link href="/add_product" className="font-mono-tag px-3 py-2 border-thick border-transparent hover:border-ink hover:bg-pop-red hover:text-paper">
+                            Add Product
                         </Link>
                     )}
 

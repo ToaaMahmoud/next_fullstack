@@ -1,19 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { z } from "zod";
 import { connectDB } from "@/lib/db";
 import Product from "@/lib/models/product";
 import { verifyAuthToken } from "@/lib/auth";
-
-const createProductSchema = z.object({
-  name: z.string().min(1),
-  description: z.string().min(1),
-  price: z.number().min(0),
-  images: z.array(z.string()),
-  category: z.string(),
-  stock: z.number().min(0),
-  tags: z.array(z.string()).optional(),
-  attributes: z.record(z.string(), z.unknown()).optional(),
-});
+import { productPayloadSchema } from "@/lib/validators/product";
 
 export async function GET(request: NextRequest) {
   const token = request.cookies.get("auth_token")?.value;
@@ -59,7 +48,7 @@ export async function POST(request: NextRequest) {
     await connectDB();
 
     const body = await request.json();
-    const parsed = createProductSchema.safeParse(body);
+    const parsed = productPayloadSchema.safeParse(body);
 
     if (!parsed.success) {
       return NextResponse.json(

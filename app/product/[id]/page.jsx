@@ -10,6 +10,7 @@ import {
   normalizeReview,
   requestJSON,
 } from "../../../lib/api-client";
+import Image from "next/image";
 
 export default function ProductPage() {
   const params = useParams();
@@ -66,6 +67,7 @@ export default function ProductPage() {
       </div>
     );
   }
+  console.log(product);
 
   return (
     <div className="mx-auto max-w-[1400px] px-4 md:px-8 py-10">
@@ -75,12 +77,19 @@ export default function ProductPage() {
 
       <section className="grid gap-8 lg:grid-cols-12">
         <div className="lg:col-span-6 border-thicker border-ink bg-paper p-4 shadow-block-sm">
-          <img src={product.image} alt={product.name} className="w-full border-thick object-cover aspect-square" />
+          <Image
+            src={product.image}
+            alt={product.name}
+            className="w-full border-thick object-cover aspect-square"
+            width={0}
+            height={0}
+            unoptimized
+          />
         </div>
 
         <div className="lg:col-span-6 space-y-6">
           <div className="border-thicker border-ink bg-paper p-6 shadow-block-sm">
-            <div className="font-mono-tag opacity-70">{product.category}</div>
+            {/* <div className="font-mono-tag opacity-70">{product.category}</div> */}
             <h1 className="mt-3 font-display text-5xl uppercase tracking-tighter">{product.name}</h1>
             <p className="mt-4 max-w-xl text-lg">{product.description}</p>
             <div className="mt-6 flex flex-wrap items-center gap-3">
@@ -89,7 +98,7 @@ export default function ProductPage() {
               <div className="bg-pop-blue text-paper border-thick px-4 py-2 font-mono-tag">{product.rating} rating</div>
             </div>
             <div className="mt-6 text-sm">
-              Seller: <span className="font-bold">{product.seller?.storeName || "Unknown seller"}</span>
+              {/* Seller: <span className="font-bold">{product.seller.id || "Unknown seller"}</span> */}
             </div>
           </div>
 

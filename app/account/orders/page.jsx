@@ -47,7 +47,7 @@ export default function OrdersPage() {
             <article key={order.id} className="border-thicker border-ink bg-paper p-6 shadow-block-sm">
               <div className="flex flex-wrap items-center justify-between gap-4">
                 <div>
-                  <div className="font-display text-3xl uppercase">{order.id}</div>
+                  <div className="font-display text-3xl uppercase">ORDER CODE: {order.id.slice(0, 10)}</div>
                   <div className="mt-2 font-mono-tag opacity-70">
                     {order.createdAt} · ETA {order.eta}
                   </div>

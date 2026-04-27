@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import Product from "@/lib/models/product";
+import { verifyAuthToken } from "@/lib/auth";
+import { productPayloadSchema } from "@/lib/validators/product";
 
 export async function GET(request: NextRequest) {
   try {
@@ -67,3 +69,43 @@ export async function GET(request: NextRequest) {
     );
   }
 }
+
+export async function POST(request: NextRequest) {
+  const token = request.cookies.get("auth_token")?.value;
+  if (!token) {
+    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+  }
+
+  try {
+    const payload = verifyAuthToken(token);
+    if (!["admin", "seller"].includes(payload.role)) {
+      return NextResponse.json({ message: "Forbidden" }, { status: 403 });
+    }
+
+    await connectDB();
+
+    const body = await request.json();
+    const parsed = productPayloadSchema.safeParse(body);
+
+    if (!parsed.success) {
+      return NextResponse.json(
+        { message: "Invalid input", errors: parsed.error.flatten() },
+        { status: 400 },
+      );
+    }
+
+    const product = await Product.create({
+      ...parsed.data,
+      seller: payload.userId,
+    });
+
+    return NextResponse.json({ product }, { status: 201 });
+  } catch (error) {
+    console.error("Create product error:", error);
+    return NextResponse.json(
+      { message: "Failed to create product" },
+      { status: 500 },
+    );
+  }
+}
+

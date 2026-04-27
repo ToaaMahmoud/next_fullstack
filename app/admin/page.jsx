@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { normalizeProduct, normalizeUser, requestJSON } from "../../lib/api-client";
 import { formatPrice } from "../../lib/format";
@@ -54,8 +55,16 @@ export default function AdminPage() {
           <div className="font-mono-tag opacity-70">Admin panel</div>
           <h1 className="mt-2 font-display text-6xl uppercase tracking-tighter">Control room</h1>
         </div>
-        <div className="bg-pop-pink border-thick px-4 py-2 font-mono-tag shadow-block-sm">
-          Live admin APIs
+        <div className="flex flex-wrap items-center gap-3">
+          <Link
+            href="/add_product"
+            className="border-thick bg-pop-red px-4 py-2 font-mono-tag text-paper shadow-block-sm hover-pop"
+          >
+            Add product
+          </Link>
+          <div className="bg-pop-pink border-thick px-4 py-2 font-mono-tag shadow-block-sm">
+            Live admin APIs
+          </div>
         </div>
       </header>
 

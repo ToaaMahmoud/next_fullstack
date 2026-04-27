@@ -8,16 +8,19 @@ import {
   normalizeProduct,
   requestJSON,
 } from "../lib/api-client";
+import Image from "next/image";
 
 
 const catColors = ["bg-pop-red text-paper", "bg-pop-yellow", "bg-pop-blue text-paper", "bg-paper"];
 export default function Home() {
   const [featured, setFeatured] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function load() {
       try {
+        setLoading(true);
         const [productsResponse, categoriesResponse] = await Promise.all([
           requestJSON("/api/products?limit=1000", { method: "GET" }),
           requestJSON("/api/categories", { method: "GET" }),
@@ -33,11 +36,14 @@ export default function Home() {
       } catch (error) {
         console.error(error);
       }
+      setLoading(false);
     }
 
     load();
   }, []);
-
+  if (loading) {
+    return <div className="px-4 md:px-8 pt-8 pb-24 mt-[30vh] text-center">Loading...</div>;
+  }
   return (
     <div className="px-4 md:px-8 pt-8 pb-24">
 
@@ -77,9 +83,12 @@ export default function Home() {
           <div className="absolute top-0 right-0 size-32 bg-pop-red border-l-thicker border-b-thicker border-ink" />
           <div className="absolute bottom-8 left-8 size-20 bg-pop-yellow border-thick rotate-12" />
           <div className="relative z-10 border-thicker bg-paper p-3 rotate-3 shadow-block">
-            <img
-              src={featured[1]?.image}
-              alt={featured[1]?.name}
+            <Image
+              src={featured[0]?.image}
+              alt={featured[0]?.name}
+              width={0}
+              height={0}
+              unoptimized
               className="h-[360px] w-[280px] object-cover border-thick"
             />
             <div className="absolute -bottom-3 -right-3 bg-pop-red text-paper border-thick px-3 py-1 font-mono-tag -rotate-3">

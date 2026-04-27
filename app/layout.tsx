@@ -1,6 +1,12 @@
 import "./globals.css";
 import Footer from "./components/Footer"
 import Navbar from "./components/Navbar"
+import { Metadata } from "next";
+
+
+export const metadata: Metadata = {
+  title: "Monolith.",
+};
 
 
 export default function RootLayout({
@@ -11,10 +17,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="min-h-full flex flex-col">
-        <Navbar/>
+        <Navbar />
         {children}
-        <Footer/>
-        </body>
+        <Footer />
+      </body>
     </html>
   );
 }

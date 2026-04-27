@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import {
     normalizeCategory,
@@ -22,7 +22,7 @@ export default function ShopPage() {
 
     // --- COMPONENT STATE ---
     const [query, setQuery] = useState(initialQuery);
-    const [maxPrice, setMaxPrice] = useState(500);
+    const [maxPrice, setMaxPrice] = useState(5000);
     const [sort, setSort] = useState("featured");
 
     useEffect(() => {
@@ -60,7 +60,7 @@ export default function ShopPage() {
     };
 
     // --- FILTERING & SORTING LOGIC ---
-    const filtered = useMemo(() => {
+    const filtered = (() => {
         let result = catalog.products.filter((p) => p.price <= maxPrice);
 
         if (currentCategory) {
@@ -84,7 +84,13 @@ export default function ShopPage() {
         if (sort === "price-desc") result = [...result].sort((a, b) => b.price - a.price);
 
         return result;
-    }, [catalog.products, currentCategory, query, maxPrice, sort, stockFilter]);
+    })();
+
+    const categoryMap = Object.fromEntries(
+        catalog.categories.map(c => [c.id, c.name])
+    );
+
+    console.log("filtered products: ", filtered);
 
     return (
         <div className="mx-auto max-w-[1400px] px-4 md:px-8 py-10 min-h-screen">
@@ -155,7 +161,7 @@ export default function ShopPage() {
                         <input
                             type="range"
                             min={20}
-                            max={500}
+                            max={10000}
                             step={10}
                             value={maxPrice}
                             onChange={(e) => setMaxPrice(Number(e.target.value))}
@@ -218,7 +224,7 @@ export default function ShopPage() {
                     ) : (
                         <div className="grid gap-6 md:gap-8 sm:grid-cols-2 lg:grid-cols-3 animate-in fade-in duration-500">
                             {filtered.map((p, i) => (
-                                <ProductCard key={p.id} product={p} index={i} />
+                                <ProductCard key={p.id} product={p} cat={categoryMap[p.category]} index={i} />
                             ))}
                         </div>
                     )}

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useMemo } from "react";
 import { formatPrice } from "../../lib/format";
 import { getCartTotals, useCartStore } from "../../lib/stores/cart-store";
+import Image from "next/image";
 
 export default function CartPage() {
     const lines = useCartStore((state) => state.items);
@@ -36,7 +37,13 @@ export default function CartPage() {
                     <div className="md:col-span-8 space-y-4">
                         {lines.map((l) => (
                             <div key={l.product.id} className="bg-paper border-thicker border-ink p-4 shadow-block-sm flex gap-4">
-                                <img src={l.product.image} alt={l.product.name} className="h-28 w-28 object-cover border-thick" />
+                                <Image
+                                    src={l.product.image}
+                                    alt={l.product.name}
+                                    unoptimized
+                                    width={0}
+                                    height={0}
+                                    className="h-28 w-28 object-cover border-thick" />
 
                                 <div className="flex flex-1 flex-col">
                                     <div className="flex items-start justify-between">
