@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import {
     normalizeCategory,
@@ -9,7 +9,8 @@ import {
 } from "../../lib/api-client";
 import ProductCard from "../components/ProductCard";
 
-export default function ShopPage() {
+// 1. We move the logic into a separate component
+function ShopContent() {
     const searchParams = useSearchParams();
     const router = useRouter();
     const pathname = usePathname();
@@ -55,7 +56,6 @@ export default function ShopPage() {
         } else {
             params.delete(key);
         }
-        // Prevents page jumping to top on every interaction
         router.push(`${pathname}?${params.toString()}`, { scroll: false });
     };
 
@@ -90,31 +90,22 @@ export default function ShopPage() {
         catalog.categories.map(c => [c.id, c.name])
     );
 
-    console.log("filtered products: ", filtered);
-
     return (
         <div className="mx-auto max-w-350 px-4 md:px-8 py-10 min-h-screen">
-
-            {/* 1. HEADER SECTION */}
+            {/* HEADER */}
             <header className="border-thicker border-ink bg-paper p-8 shadow-block-sm flex flex-wrap items-end justify-between gap-4">
                 <div>
                     <div className="font-mono-tag text-sm uppercase tracking-widest opacity-70">Catalog</div>
-                    <h1 className="mt-2 font-display text-6xl md:text-7xl uppercase tracking-tighter">
-                        All goods
-                    </h1>
+                    <h1 className="mt-2 font-display text-6xl md:text-7xl uppercase tracking-tighter">All goods</h1>
                 </div>
                 <div className="bg-pop-yellow border-thick px-6 py-2 font-mono-tag -rotate-2 shadow-block-sm">
                     {filtered.length} {filtered.length === 1 ? "item" : "results"}
                 </div>
             </header>
 
-            {/* 2. MAIN LAYOUT GRID */}
             <div className="mt-8 flex flex-col md:grid md:grid-cols-12 gap-8 items-start">
-
-                {/* --- ASIDE: FILTERS (order-1: Top on Mobile, Left on Desktop) --- */}
+                {/* ASIDE FILTERS */}
                 <aside className="order-1 md:col-span-3 space-y-6 w-full md:sticky top-24">
-
-                    {/* Text Search */}
                     <div className="border-thicker border-ink bg-paper p-5 shadow-block-sm">
                         <label className="font-mono-tag block mb-2 text-xs uppercase">Search</label>
                         <input
@@ -124,19 +115,17 @@ export default function ShopPage() {
                                 updateFilters("q", e.target.value);
                             }}
                             placeholder="Type to search..."
-                            className="w-full border-thick bg-background px-3 py-2 outline-none focus:bg-white transition-all placeholder:opacity-30"
+                            className="w-full border-thick bg-background px-3 py-2 outline-none focus:bg-white transition-all"
                         />
                     </div>
 
-                    {/* Categories */}
                     <div className="border-thicker border-ink bg-paper p-5 shadow-block-sm">
                         <div className="font-mono-tag mb-4 text-xs uppercase border-b-thick border-ink pb-2">Categories</div>
                         <ul className="space-y-3">
                             <li>
                                 <button
                                     onClick={() => updateFilters("category", null)}
-                                    className={`w-full text-left font-mono-tag text-sm transition-all hover:translate-x-1 ${!currentCategory ? "font-bold text-pop-red underline underline-offset-4" : ""
-                                        }`}
+                                    className={`w-full text-left font-mono-tag text-sm ${!currentCategory ? "font-bold text-pop-red underline" : ""}`}
                                 >
                                     [ ALL ITEMS ]
                                 </button>
@@ -145,8 +134,7 @@ export default function ShopPage() {
                                 <li key={c.id}>
                                     <button
                                         onClick={() => updateFilters("category", c.id)}
-                                        className={`w-full text-left font-mono-tag text-sm transition-all hover:translate-x-1 ${currentCategory === c.id ? "font-bold text-pop-red underline underline-offset-4" : ""
-                                            }`}
+                                        className={`w-full text-left font-mono-tag text-sm ${currentCategory === c.id ? "font-bold text-pop-red underline" : ""}`}
                                     >
                                         → {c.name.toUpperCase()} <span className="text-[10px] opacity-40">({c.count})</span>
                                     </button>
@@ -155,7 +143,6 @@ export default function ShopPage() {
                         </ul>
                     </div>
 
-                    {/* Price Range */}
                     <div className="border-thicker border-ink bg-pop-yellow p-5 shadow-block-sm">
                         <div className="font-mono-tag mb-3 text-xs uppercase">Budget Cap · ${maxPrice}</div>
                         <input
@@ -165,64 +152,25 @@ export default function ShopPage() {
                             step={10}
                             value={maxPrice}
                             onChange={(e) => setMaxPrice(Number(e.target.value))}
-                            className="w-full accent-ink cursor-pointer"
+                            className="w-full accent-ink"
                         />
-                    </div>
-
-                    <div className="border-thicker border-ink bg-paper p-5 shadow-block-sm">
-                        <div className="font-mono-tag mb-3 text-xs uppercase">Availability</div>
-                        <button
-                            type="button"
-                            onClick={() => updateFilters("stock", stockFilter ? null : "in")}
-                            className={`w-full border-thick px-3 py-3 font-mono-tag shadow-block-sm ${stockFilter ? "bg-pop-lime" : "bg-background"}`}
-                        >
-                            {stockFilter ? "In-stock only" : "Show all stock"}
-                        </button>
-                    </div>
-
-                    {/* Sort */}
-                    <div className="border-thicker border-ink bg-paper p-5 shadow-block-sm">
-                        <div className="font-mono-tag mb-2 text-xs uppercase">Sort by</div>
-                        <select
-                            value={sort}
-                            onChange={(e) => setSort(e.target.value)}
-                            className="w-full border-thick bg-background px-2 py-2 outline-none cursor-pointer font-mono-tag text-sm"
-                        >
-                            <option value="featured">Featured</option>
-                            <option value="price-asc">Price ↑ (Low to High)</option>
-                            <option value="price-desc">Price ↓ (High to Low)</option>
-                        </select>
                     </div>
                 </aside>
 
-                {/* --- MAIN: PRODUCTS (order-2: Below Filters on Mobile, Right on Desktop) --- */}
+                {/* MAIN PRODUCTS GRID */}
                 <main className="order-2 md:col-span-9 min-h-150 w-full">
                     {filtered.length === 0 ? (
-                        <div className="w-full border-thicker border-dashed border-ink bg-paper p-12 md:p-20 text-center shadow-block-sm flex flex-col items-center justify-center relative overflow-hidden">
-                            {/* Decorative Deco */}
-                            <div className="absolute inset-0 opacity-[0.03] pointer-events-none select-none flex items-center justify-center text-[10rem] md:text-[15rem] font-display">
-                                EMPTY
-                            </div>
-
-                            <div className="relative z-10">
-                                <div className="font-display text-4xl uppercase tracking-tighter">Zero matches</div>
-                                <p className="mt-4 font-mono-tag opacity-70 max-w-xs mx-auto text-sm">
-                                    No items found with current filters.
-                                </p>
-                                <button
-                                    onClick={() => {
-                                        setQuery("");
-                                        setMaxPrice(500);
-                                        router.push(pathname);
-                                    }}
-                                    className="mt-8 bg-ink text-paper border-thick px-8 py-3 font-mono-tag uppercase tracking-widest hover:bg-pop-red transition-colors shadow-block-sm active:translate-y-1 active:shadow-none"
-                                >
-                                    Reset Filters
-                                </button>
-                            </div>
+                        <div className="w-full border-thicker border-dashed border-ink bg-paper p-20 text-center shadow-block-sm">
+                            <div className="font-display text-4xl uppercase">Zero matches</div>
+                            <button
+                                onClick={() => { setQuery(""); setMaxPrice(5000); router.push(pathname); }}
+                                className="mt-8 bg-ink text-paper border-thick px-8 py-3 font-mono-tag"
+                            >
+                                Reset Filters
+                            </button>
                         </div>
                     ) : (
-                        <div className="grid gap-6 md:gap-8 sm:grid-cols-2 lg:grid-cols-3 animate-in fade-in duration-500">
+                        <div className="grid gap-6 md:gap-8 sm:grid-cols-2 lg:grid-cols-3">
                             {filtered.map((p, i) => (
                                 <ProductCard key={p.id} product={p} cat={categoryMap[p.category]} index={i} />
                             ))}
@@ -231,5 +179,14 @@ export default function ShopPage() {
                 </main>
             </div>
         </div>
+    );
+}
+
+// 2. THE FIX: Default export wraps the logic in Suspense
+export default function ShopPage() {
+    return (
+        <Suspense fallback={<div className="p-20 text-center font-mono-tag">LOADING CATALOG...</div>}>
+            <ShopContent />
+        </Suspense>
     );
 }
